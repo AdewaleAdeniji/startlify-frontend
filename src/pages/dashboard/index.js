@@ -1,42 +1,51 @@
-import React from "react";
+import { useToast } from "@chakra-ui/react";
+import React, { useEffect, useState } from "react";
+import MailMan from "../../components/dashboard/MailMan";
 import SidebarWithHeader from "../../components/layout/SideBar";
-import DashboardTable from "../../components/dashboard/table";
-import { Box, Flex, Image, Text } from "@chakra-ui/react";
+import { GetAllEmails, GetUserEmails } from "../../services/api";
 
 const Dashboard = () => {
+  // need to fetch all emails and pass it
+  const [userEmailAddresses, setUserEmailAddresses] = useState([]);
+  const [loading, setLoading] = useState([]);
+  const [emails, setEmails] = useState([]);
+
+  const toast = useToast();
+  useEffect(() => {
+    setupDashboard();
+    console.log("called");
+  }, []);
+  const setupDashboard = async () => {
+    setLoading(true);
+    const api = await GetUserEmails();
+    if (!api.success) {
+      return toast({
+        title: api.message,
+        status: "error",
+        isClosable: true,
+      });
+    }
+    setUserEmailAddresses(api.emails);
+    if (api.emails.length > 0) {
+      getAllMails(api.emails);
+    }
+  };
+  const handleChangeEmail = (em) => {
+      console.log(em.emailAddressID)
+  }
+  const getAllMails = async (emails) => {
+    console.log("got here");
+
+    const api = await GetAllEmails(emails);
+    setLoading(false);
+    console.log(api);
+    if (api.length > 0) {
+      setEmails(api);
+    }
+  };
   return (
-    <SidebarWithHeader>
-      <Box
-        p={3}
-        borderRadius="md"
-        borderWidth="1px"
-        bg={"white"}
-        borderColor="gray.200"
-        display={{ base: "block", md: "none" }} // Display on mobile only
-      >
-        <Flex alignItems="center">
-          <Image
-            src="https://flowbite-admin-dashboard.vercel.app/images/logo.svg"
-            boxSize="40px"
-            objectFit="cover"
-            mr={3}
-          />
-          <Box flex="1">
-            <Text fontWeight="bold">Title of the email</Text>
-            <Text fontSize="sm" color="gray.600">
-              some excerpts from the email
-            </Text>
-          </Box>
-          <Text fontSize="sm" color="gray.600">
-            24/09/2002
-          </Text>
-        </Flex>
-      </Box>
-      <Box
-        display={{ base: "none", md: "block" }} // Display on mobile only
-      >
-      <DashboardTable />
-      </Box>
+    <SidebarWithHeader activeEmail={"All"} emails={userEmailAddresses} handleChangeEmail={handleChangeEmail}>
+      <MailMan emails={emails} />
     </SidebarWithHeader>
   );
 };

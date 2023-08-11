@@ -123,7 +123,7 @@ const NavItem = ({ icon, children, path, ...rest }) => {
   );
 };
 
-const MobileNav = ({ onOpen, ...rest }) => {
+const MobileNav = ({ onOpen, emails, activeEmail, handleChangeEmail,  ...rest }) => {
   const { colorMode, toggleColorMode } = useColorMode();
   return (
     <Flex
@@ -178,9 +178,9 @@ const MobileNav = ({ onOpen, ...rest }) => {
                   spacing="1px"
                   ml="2"
                 >
-                  <Text fontSize="sm">Showing all Email Inboxes</Text>
+                  <Text fontSize="sm">Showing {activeEmail} Email Inboxes</Text>
                   <Text fontSize="xs" color="gray.600">
-                    All
+                    {activeEmail}
                   </Text>
                 </VStack>
                 <Box display={{ base: "none", md: "flex" }}>
@@ -192,9 +192,16 @@ const MobileNav = ({ onOpen, ...rest }) => {
               bg={useColorModeValue("white", "gray.900")}
               borderColor={useColorModeValue("gray.200", "gray.700")}
             >
-              <MenuItem>devferanmi@gmal.com</MenuItem>
-              <MenuItem>devferanmi@gmail.com</MenuItem>
-              <MenuItem>devferanmi@gmail.com</MenuItem>
+              {emails.map((email) => {
+                return (
+                  <MenuItem
+                    key={email.emailAddressID}
+                    onClick={() => handleChangeEmail(email)}
+                  >
+                    {email.emailAddress}
+                  </MenuItem>
+                );
+              })}
               <MenuDivider />
               <MenuItem>Sign out</MenuItem>
             </MenuList>
@@ -205,7 +212,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
   );
 };
 
-const SidebarWithHeader = ({ children }) => {
+const SidebarWithHeader = ({ children, emails, activeEmail, handleChangeEmail }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -227,7 +234,7 @@ const SidebarWithHeader = ({ children }) => {
         </DrawerContent>
       </Drawer>
       {/* mobilenav */}
-      <MobileNav onOpen={onOpen} />
+      <MobileNav onOpen={onOpen} emails={emails} activeEmail={activeEmail} handleChangeEmail={handleChangeEmail}/>
       <Box ml={{ base: 0, md: 60 }} p="4">
         {children}
       </Box>

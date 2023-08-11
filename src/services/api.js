@@ -1,13 +1,21 @@
 import axios from "axios";
 import configs from "../config";
-
+export const validateEmail = (email) => {
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailPattern.test(email);
+}
+export const LogUserIn = (userObj) => {
+  console.log(userObj);
+  localStorage.setItem('user', JSON.stringify(userObj));
+  localStorage.setItem('token', userObj.token);
+}
 export const Register = async (payload) => {
-    // {
-    //     firstName: "deji",
-    //     lastName: "sarumi",
-    //     email: "devferanmi@gmail.com",
-    //     password: "password",
-    //   }
+  // {
+  //     firstName: "deji",
+  //     lastName: "sarumi",
+  //     email: "devferanmi@gmail.com",
+  //     password: "password",
+  //   }
   var data = JSON.stringify(payload);
   var config = {
     method: "post",
@@ -33,10 +41,10 @@ export const Register = async (payload) => {
 };
 
 export const Login = async (payload) => {
-    // {
-    //     email: "devferanmi@gmail.com",
-    //     password: "password",
-    //   }
+  // {
+  //     email: "devferanmi@gmail.com",
+  //     password: "password",
+  //   }
   var data = JSON.stringify(payload);
   var config = {
     method: "post",
@@ -60,18 +68,28 @@ export const Login = async (payload) => {
     };
   }
 };
-
-export const CreateEmail = async (payload, token) => {
-    // {
-    //     email: "devferanmi@gmail.com",
-    //     password: "password",
-    //   }
+const getTokenFromLocal = () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    window.location.href = "/auth/login";
+    return;
+  }
+  return token;
+};
+export const CreateEmail = async (payload) => {
+  const token = await getTokenFromLocal();
+  // {
+  //   "userID": "",
+  //   "permanent": true,
+  //   "emailName": "myownemail"
+  // }
   var data = JSON.stringify(payload);
   var config = {
     method: "post",
     url: `${configs.API_BASE_URL}/email/create`,
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     data: data,
   };
@@ -87,4 +105,99 @@ export const CreateEmail = async (payload, token) => {
       message: err?.response?.data?.message || "Request failed ",
     };
   }
-}
+};
+export const GetUserEmails = async () => {
+  const token = await getTokenFromLocal();
+  // {
+  //   "userID": "",
+  //   "permanent": true,
+  //   "emailName": "myownemail"
+  // }
+  var config = {
+    method: "get",
+    url: `${configs.API_BASE_URL}/emails`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  try {
+    const req = await axios(config);
+    return {
+      success: true,
+      ...req.data,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      message: err?.response?.data?.message || "Request failed ",
+    };
+  }
+};
+export const GetEmails = async (emailID) => {
+  const token = await getTokenFromLocal();
+  // {
+  //   "userID": "",
+  //   "permanent": true,
+  //   "emailName": "myownemail"
+  // }
+  var config = {
+    method: "get",
+    url: `${configs.API_BASE_URL}/emails/${emailID}`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  try {
+    const req = await axios(config);
+    return {
+      success: true,
+      ...req.data,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      message: err?.response?.data?.message || "Request failed ",
+    };
+  }
+};
+export const GetEmailDetails = async (emailID, emailAddressID) => {
+  const token = await getTokenFromLocal();
+  // {
+  //   "userID": "",
+  //   "permanent": true,
+  //   "emailName": "myownemail"
+  // }
+  var config = {
+    method: "get",
+    url: `${configs.API_BASE_URL}/mails/${emailAddressID}/${emailID}`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  try {
+    const req = await axios(config);
+    return {
+      success: true,
+      ...req.data,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      message: err?.response?.data?.message || "Request failed ",
+    };
+  }
+};
+export const GetAllEmails = async (emails) => {
+  const email = [];
+  for(var i=0; i<emails.length; i++){
+    const mail = emails[i];
+    const mails = await GetEmails(mail.emailAddressID)
+    if(mails.success){
+        email.push(mails.emails)
+    }
+  }
+  return email.flat(1);
+};
