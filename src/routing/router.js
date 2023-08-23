@@ -37,7 +37,7 @@ const router = createBrowserRouter([
     element: (
       <div>
         <h1>404 - Page Not Found</h1>
-        {/* You can customize the error message and styling here */}
+        Go <a href="/">Back Home</a>
       </div>
     ),
   },
