@@ -32,5 +32,14 @@ const router = createBrowserRouter([
     path: "/app/email/:emailID/:emailAddressID",
     element: <EmailDetail />,
   },
+  {
+    path: "*",
+    element: (
+      <div>
+        <h1>404 - Page Not Found</h1>
+        {/* You can customize the error message and styling here */}
+      </div>
+    ),
+  },
 ]);
 export default router;

@@ -110,6 +110,18 @@ const Dashboard = () => {
           <Spinner /> {loadingText}
         </chakra.h1>
       )}
+      {!loading && userEmailAddresses.length === 0 && (
+        <chakra.h1
+          textAlign={"center"}
+          fontSize={"sm"}
+          fontWeight={"bold"}
+          p={5}
+        >
+          You have not created any custom email. <br />
+          Click on create email on the
+          top menu to get started.
+        </chakra.h1>
+      )}
 
       <MailMan
         emails={emails}
