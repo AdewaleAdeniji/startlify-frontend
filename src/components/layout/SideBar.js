@@ -3,12 +3,10 @@ import {
   Avatar,
   Box,
   Button,
-  CloseButton,
   Drawer,
   DrawerContent,
   Flex,
   HStack,
-  Icon,
   IconButton,
   Menu,
   MenuButton,
@@ -19,12 +17,11 @@ import {
   VStack,
   useColorMode,
   useColorModeValue,
-  useDisclosure,
+  useDisclosure
 } from "@chakra-ui/react";
-import { useState } from "react";
-import { FiChevronDown, FiHome, FiMenu, FiPlus } from "react-icons/fi";
-import { Link } from "react-router-dom";
-import CreateEmailModal from "../dashboard/CreateModal";
+import { FiChevronDown, FiHome, FiMenu } from "react-icons/fi";
+import { LogUserOut, getUser } from "../../services/api";
+import { SidebarContent } from "./SideBarContent";
 
 const LinkItems = [
   { name: "Dashboard", icon: FiHome, path: "/app/dashboard" },
@@ -33,98 +30,16 @@ const LinkItems = [
   //   { name: 'Favourites', icon: FiStar },
   //   { name: 'Settings', icon: FiSettings },
 ];
-const SidebarContent = ({ onClose, ...rest }) => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const handleCreateEmail = (emailName) => {
-    console.log(emailName);
-    setModalOpen(false);
-  };
 
-  return (
-    <>
-      <Box
-        transition="3s ease"
-        bg={useColorModeValue("white", "gray.900")}
-        borderRight="1px"
-        borderRightColor={useColorModeValue("gray.200", "gray.700")}
-        w={{ base: "full", md: 60 }}
-        pos="fixed"
-        h="full"
-        {...rest}
-      >
-        <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
-          <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
-            Startlify
-          </Text>
-          <CloseButton
-            display={{ base: "flex", md: "none" }}
-            onClick={onClose}
-          />
-        </Flex>
-        {LinkItems.map((link) => (
-          <NavItem key={link.name} icon={link.icon} path={link.path}>
-            {link.name}
-          </NavItem>
-        ))}
-        <NavItem
-          icon={FiPlus}
-          bg={"green.400"}
-          color={"white"}
-          onClick={() => setModalOpen(true)}
-        >
-          Create Email
-        </NavItem>
-      </Box>
-      <CreateEmailModal
-        isOpen={modalOpen}
-        onClose={() => console.log("closed")}
-        onCreateEmail={handleCreateEmail}
-      />
-    </>
-  );
-};
-
-const NavItem = ({ icon, children, path, ...rest }) => {
-  return (
-    <Box
-      as="a"
-      href="#"
-      style={{ textDecoration: "none" }}
-      _focus={{ boxShadow: "none" }}
-    >
-      <Link to={path}>
-        <Flex
-          align="center"
-          p="4"
-          mx="4"
-          borderRadius="lg"
-          role="group"
-          cursor="pointer"
-          _hover={{
-            bg: "green.400",
-            color: "white",
-          }}
-          {...rest}
-        >
-          {icon && (
-            <Icon
-              mr="4"
-              fontSize="13"
-              _groupHover={{
-                color: "white",
-              }}
-              as={icon}
-            />
-          )}
-          {children}
-        </Flex>
-      </Link>
-    </Box>
-  );
-};
-
-const MobileNav = ({ onOpen, emails, activeEmail, handleChangeEmail,  ...rest }) => {
+const MobileNav = ({
+  onOpen,
+  emails,
+  activeEmail,
+  handleChangeEmail,
+  ...rest
+}) => {
   const { colorMode, toggleColorMode } = useColorMode();
+  const user = getUser();
   return (
     <Flex
       ml={{ base: 0, md: 60 }}
@@ -178,9 +93,9 @@ const MobileNav = ({ onOpen, emails, activeEmail, handleChangeEmail,  ...rest })
                   spacing="1px"
                   ml="2"
                 >
-                  <Text fontSize="sm">Showing {activeEmail} Email Inboxes</Text>
+                  <Text fontSize="sm">{user?.firstName}</Text>
                   <Text fontSize="xs" color="gray.600">
-                    {activeEmail}
+                    {user?.lastName}
                   </Text>
                 </VStack>
                 <Box display={{ base: "none", md: "flex" }}>
@@ -192,18 +107,25 @@ const MobileNav = ({ onOpen, emails, activeEmail, handleChangeEmail,  ...rest })
               bg={useColorModeValue("white", "gray.900")}
               borderColor={useColorModeValue("gray.200", "gray.700")}
             >
-              {emails.map((email) => {
+                <MenuItem>Profile</MenuItem>
+              {/* {emails.map((email) => {
                 return (
                   <MenuItem
                     key={email.emailAddressID}
-                    onClick={() => handleChangeEmail(email)}
+                    onClick={() =>
+                      handleChangeEmail(
+                        CHANGE_EMAIL_TYPES.EMAIL_SWITCHED,
+                        email
+                      )
+                    }
                   >
                     {email.emailAddress}
                   </MenuItem>
                 );
-              })}
+              })} */}
               <MenuDivider />
-              <MenuItem>Sign out</MenuItem>
+            
+              <MenuItem onClick={LogUserOut}>Sign out</MenuItem>
             </MenuList>
           </Menu>
         </Flex>
@@ -212,7 +134,12 @@ const MobileNav = ({ onOpen, emails, activeEmail, handleChangeEmail,  ...rest })
   );
 };
 
-const SidebarWithHeader = ({ children, emails, activeEmail, handleChangeEmail }) => {
+const SidebarWithHeader = ({
+  children,
+  emails,
+  activeEmail,
+  handleChangeEmail,
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -220,6 +147,9 @@ const SidebarWithHeader = ({ children, emails, activeEmail, handleChangeEmail })
       <SidebarContent
         onClose={() => onClose}
         display={{ base: "none", md: "block" }}
+        handleChangeEmail={handleChangeEmail}
+        emails={emails}
+        linkItems={LinkItems}
       />
       <Drawer
         isOpen={isOpen}
@@ -230,11 +160,21 @@ const SidebarWithHeader = ({ children, emails, activeEmail, handleChangeEmail })
         size="full"
       >
         <DrawerContent>
-          <SidebarContent onClose={onClose} />
+          <SidebarContent
+            onClose={onClose}
+            linkItems={LinkItems}
+            handleChangeEmail={handleChangeEmail}
+            emails={emails}
+          />
         </DrawerContent>
       </Drawer>
       {/* mobilenav */}
-      <MobileNav onOpen={onOpen} emails={emails} activeEmail={activeEmail} handleChangeEmail={handleChangeEmail}/>
+      <MobileNav
+        onOpen={onOpen}
+        emails={emails}
+        activeEmail={activeEmail}
+        handleChangeEmail={handleChangeEmail}
+      />
       <Box ml={{ base: 0, md: 60 }} p="4">
         {children}
       </Box>

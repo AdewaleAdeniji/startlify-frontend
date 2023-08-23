@@ -1,6 +1,6 @@
 import { formatDate } from "../../services/date";
 
-const DashboardTable = ({ emails }) => {
+const DashboardTable = ({ emails, handleOpenEmail }) => {
   return (
     <div class="overflow-x-auto">
       <div class="inline-block min-w-full align-middle">
@@ -11,9 +11,9 @@ const DashboardTable = ({ emails }) => {
               return (
                 <tr
                   class="cursor-pointer hover:bg-gray-100"
-                  onclick="location.href='https://demos.creative-tim.com/soft-ui-flowbite-pro/mailing/read/';"
+                  onClick={()=> handleOpenEmail(email?.emailAddressID, email?.emailID)}
                 >
-                  <td class="p-4 w-4">
+                  {/* <td class="p-4 w-4">
                     <div class="inline-flex items-center space-x-4">
                       <div>
                         <input
@@ -43,7 +43,7 @@ const DashboardTable = ({ emails }) => {
                         ></path>
                       </svg>
                     </div>
-                  </td>
+                  </td> */}
                   <td class="flex items-center p-4 space-x-4 whitespace-nowrap">
                     <img
                       class="w-6 h-6 rounded-full"
