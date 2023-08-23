@@ -1,42 +1,129 @@
-import React from "react";
+import { Spinner, chakra, useToast } from "@chakra-ui/react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import MailMan from "../../components/dashboard/MailMan";
+import BasicStatistics from "../../components/dashboard/Stats";
 import SidebarWithHeader from "../../components/layout/SideBar";
-import DashboardTable from "../../components/dashboard/table";
-import { Box, Flex, Image, Text } from "@chakra-ui/react";
+import { CHANGE_EMAIL_TYPES } from "../../constants";
+import { useCache } from "../../helpers/utils";
+import { GetEmails, GetUserEmails } from "../../services/api";
 
 const SingleDashboard = () => {
+  // need to fetch all emails and pass i
+  const toast = useToast();
+  const { emailAddressID } = useParams();
+  const { getData, saveData } = useCache();
+  const [userEmailAddresses, setUserEmailAddresses] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [emails, setEmails] = useState(getData(`${emailAddressID}-emails`, []));
+  const [details, setDetails] = useState(JSON.parse(getData(emailAddressID, "{}")));
+  const navigate = useNavigate();
+  const [loadingText, setLoadingText] = useState("");
+
+  useEffect(() => {
+    setupDashboard(true); // Initial setup
+    const interval = setInterval(() => {
+      setupDashboard(false); // Subsequent setups every 7 seconds
+    }, 7000); // 7 seconds in milliseconds
+
+    return () => clearInterval(interval); // Clean up interval on unmount
+  }, [emailAddressID]);
+  if (!emailAddressID) {
+    window.location.href = "/app/dashboard";
+    return;
+  }
+  const handleOpenEmail  =  (emailAddressID, emailID) => {
+    navigate(`/app/email/${emailID}/${emailAddressID}`);
+  }
+  const setupDashboard = async (proceed = true) => {
+    setLoading(true);
+    setLoadingText("Setting up...");
+    getAllMails();
+    const api = await GetUserEmails();
+    if (!api.success) {
+      return toast({
+        title: api.message,
+        status: "error",
+        isClosable: true,
+      });
+    }
+    setUserEmailAddresses(api.emails);
+    saveData('user-emails', api.emails)
+    if (api.emails.length > 0) {
+      const selectedEmail = api.emails.filter(
+        (em) => em.emailAddressID === emailAddressID
+      );
+
+      if (selectedEmail.length > 0) {
+        // found it
+        saveData(emailAddressID, JSON.stringify(selectedEmail[0]))
+        setDetails(selectedEmail[0]);
+      }
+    }
+    setLoading(false);
+    setLoadingText("");
+  };
+  const handleChangeEmail = (updateType, emailChange) => {
+    setLoadingText("Refreshing mails");
+    if(updateType ===  CHANGE_EMAIL_TYPES.REFRESH) {
+      setupDashboard(true)
+      return;
+    }
+    setEmails([])
+    if (updateType === CHANGE_EMAIL_TYPES.EMAIL_CREATED) {
+      setupDashboard(false);
+    }
+    navigate(`/app/dashboard/${emailChange.emailAddressID}`);
+  };
+  const getAllMails = async () => {
+    setLoadingText("Refreshing emails");
+    setLoading(true);
+    const api = await GetEmails(emailAddressID);
+    setLoading(false);
+    setLoadingText("");
+    // if (api.emails.length > 0) {
+      saveData(`${emailAddressID}-emails`, api.emails)
+      console.log(api.emails)
+      setEmails(api.emails);
+    // }
+  };
   return (
-    <SidebarWithHeader >
-      <Box
-        p={3}
-        borderRadius="md"
-        borderWidth="1px"
-        bg={"white"}
-        borderColor="gray.200"
-        display={{ base: "block", md: "none" }} // Display on mobile only
-      >
-        <Flex alignItems="center">
-          <Image
-            src="https://flowbite-admin-dashboard.vercel.app/images/logo.svg"
-            boxSize="40px"
-            objectFit="cover"
-            mr={3}
-          />
-          <Box flex="1">
-            <Text fontWeight="bold">Title of the email</Text>
-            <Text fontSize="sm" color="gray.600">
-              some excerpts from the email
-            </Text>
-          </Box>
-          <Text fontSize="sm" color="gray.600">
-            24/09/2002
-          </Text>
-        </Flex>
-      </Box>
-      <Box
-        display={{ base: "none", md: "block" }} // Display on mobile only
-      >
-      <DashboardTable />
-      </Box>
+    <SidebarWithHeader
+      activeEmail={details?.emailAddress}
+      emails={userEmailAddresses}
+      handleChangeEmail={handleChangeEmail}
+    >
+      <BasicStatistics
+        text={"Showing all inboxes"}
+        activeEmail={details?.emailAddress}
+        totalEmails={emails.length}
+        emails={userEmailAddresses}
+        handleChangeEmail={handleChangeEmail}
+        showStats={false}
+        loading={loading}
+      />
+      {loading && (
+        <chakra.h1
+          textAlign={"center"}
+          fontSize={"sm"}
+          fontWeight={"bold"}
+          p={5}
+        >
+          <Spinner /> {loadingText}
+        </chakra.h1>
+      )}
+
+      {!loading && (
+        <chakra.h1
+          textAlign={"right"}
+          fontSize={"sm"}
+          fontWeight={"bold"}
+          p={5}
+        >
+          Showing {emails.length} of {emails.length}
+        </chakra.h1>
+      )}
+      <MailMan emails={emails} loading={loading} handleOpenEmail={handleOpenEmail}/>
     </SidebarWithHeader>
   );
 };

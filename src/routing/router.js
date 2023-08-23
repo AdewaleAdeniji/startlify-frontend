@@ -25,15 +25,11 @@ const router = createBrowserRouter([
     element: <Dashboard />,
   },
   {
-    path: "/app/dashboard/all",
-    element: <Dashboard />,
-  },
-  {
-    path: "/app/dashboard/:email",
+    path: "/app/dashboard/:emailAddressID",
     element: <SingleDashboard />,
   },
   {
-    path: "/app/email/:emailID",
+    path: "/app/email/:emailID/:emailAddressID",
     element: <EmailDetail />,
   },
 ]);

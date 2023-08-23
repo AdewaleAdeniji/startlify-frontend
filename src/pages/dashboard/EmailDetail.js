@@ -1,12 +1,56 @@
 import { ArrowBackIcon } from "@chakra-ui/icons";
-import { Box, Flex, IconButton, Text, VStack, useColorModeValue } from "@chakra-ui/react";
-import React from "react";
+import {
+  Box,
+  Flex,
+  IconButton,
+  Text,
+  VStack,
+  useColorModeValue,
+  useToast,
+  chakra,
+  Spinner,
+} from "@chakra-ui/react";
+import React, { useEffect, useState } from "react";
 import SidebarWithHeader from "../../components/layout/SideBar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import parse from "html-react-parser";
+import { GetEmailDetails } from "../../services/api";
+import { formatDate } from "../../services/date";
+import { useCache } from "../../helpers/utils";
 
 const EmailDetail = () => {
   const navigate = useNavigate();
+  const toast = useToast();
+  const { getData, saveData } = useCache();
+  const { emailID, emailAddressID } = useParams();
+  const [mail, setMail] = useState(getData(`${emailAddressID}-${emailID}`, {}));
+  const [loading, setLoading] = useState(true);
+  const [loadingText, setLoadingText] = useState("");
+  const bgColor = useColorModeValue("white", "black");
+
+  useEffect(() => {
+    // setEmails([]);
+    getEmail(true);
+  }, [emailID, emailAddressID]);
+  if (!emailID || !emailAddressID) {
+    window.location.href = "/app/dashboard";
+    return;
+  }
+  const getEmail = async () => {
+    setLoading(true);
+    setLoadingText("Getting email .....");
+    const api = await GetEmailDetails(emailID, emailAddressID);
+    setLoading(false);
+    if (!api.success) {
+      return toast({
+        title: api.message,
+        status: "error",
+        isClosable: true,
+      });
+    }
+    saveData(`${emailAddressID}-${emailID}`, api.data);
+    setMail(api.data);
+  };
   return (
     <SidebarWithHeader>
       <VStack p={4} spacing={4} align="stretch">
@@ -19,18 +63,49 @@ const EmailDetail = () => {
             onClick={() => navigate(-1)}
           />
           <Text fontWeight="bold" ml={2} flex="1">
-            Sender - subject of the email
+            {loading && !mail._id ? (
+              <chakra.h1
+                textAlign={"left"}
+                fontSize={"sm"}
+                fontWeight={"bold"}
+                p={5}
+              >
+                <Spinner />
+              </chakra.h1>
+            ) : (
+              mail?.fromName + " - " + mail?.subject
+            )}
           </Text>
           <Text fontSize="sm" color="gray.600">
-            date
+            {loading && !mail._id ? (
+              <chakra.h1
+                textAlign={"left"}
+                fontSize={"sm"}
+                fontWeight={"bold"}
+                p={5}
+              >
+                <Spinner />
+              </chakra.h1>
+            ) : (
+              formatDate(mail?.createdAt)
+            )}
           </Text>
         </Flex>
 
         {/* Email Content */}
-        <Box borderWidth="1px" borderColor="white.200" p={4} bg={useColorModeValue("white", "black")}>
-          {parse(`<div dir="ltr"><div><br></div></div><br>
-<div><span><span><b>Moniepoint Inc</b></span></span></div><div>The Post Square,<br>Off Adeola Odeku, Victoria Island<br>Lagos, Nigeria<br></div><div><span><span><a href="http://www.teamapt.com" target="_blank"><u>www.moniepoint.com</u></a></span></span></div><div><span><br></span></div><span><span>Disclaimer:
-This email including any attached files may contain confidential and privileged information for the sole use of the designated recipient. </span></span><div><span><span>Please note that the views expressed therein do not represent the views of </span></span>Moniepoint Inc<span><span>. except where specifically stated. </span></span></div><div><span><span>Any review, use, distribution or disclosure by others is strictly prohibited. </span></span></div><div><span><span>If you are not the designated recipient (or authorized to receive information for the designated recipient), please inform the sender by reply email and delete all copies of the message. </span></span></div><div><span><span>Moniepoint Inc. will not accept any liability for loss or damage arising directly or indirectly from the transmission of this message.</span></span><br></div>`)}
+        <Box borderWidth="1px" borderColor="white.200" p={4} bg={bgColor}>
+          {loading && !mail._id ? (
+            <chakra.h1
+              textAlign={"center"}
+              fontSize={"sm"}
+              fontWeight={"bold"}
+              p={5}
+            >
+              <Spinner /> {loadingText}
+            </chakra.h1>
+          ) : (
+            <>{parse(mail?.html)}</>
+          )}
         </Box>
       </VStack>
     </SidebarWithHeader>

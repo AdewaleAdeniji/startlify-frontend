@@ -1,24 +1,23 @@
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import {
-    Flex,
-    Box,
-    FormControl,
-    FormLabel,
-    Input,
-    InputGroup,
-    HStack,
-    InputRightElement,
-    Stack,
-    Button,
-    Heading,
-    Text,
-    useColorModeValue,
-    useToast,
-  } from "@chakra-ui/react";
-  import { useState } from "react";
-  import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
-  import PageContainer from "../../layouts/PageContainer";
-  import { Link } from "react-router-dom";
-  import { LogUserIn, Login, Register, validateEmail } from "../../services/api";
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormLabel,
+  Heading,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Stack,
+  Text,
+  useColorModeValue,
+  useToast
+} from "@chakra-ui/react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import PageContainer from "../../layouts/PageContainer";
+import { LogUserIn, Login, validateEmail } from "../../services/api";
   
   export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
@@ -33,7 +32,6 @@ import {
       loading;
     const toast = useToast();
     const handleSubmit = async () => {
-      console.log("submit button clicked");
       if(payload.password.length < 8) {
         return toast({
           title: `Password must be 8 characters or more`,
@@ -67,10 +65,7 @@ import {
       })
       await LogUserIn(api);
       window.location.href="/app/dashboard"
-      console.log('attempt to sign in')
-  
     };
-    console.log(disabled);
     return (
       <PageContainer>
         <Flex

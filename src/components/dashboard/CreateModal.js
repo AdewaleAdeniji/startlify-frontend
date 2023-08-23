@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Button,
   Input,
@@ -9,18 +9,51 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-} from '@chakra-ui/react';
-import { Text } from 'chakra-ui';
+  useToast,
+} from "@chakra-ui/react";
+import { Text } from "chakra-ui";
+import { filterAlphanumeric } from "../../helpers/utils";
+import { CreateEmail } from "../../services/api";
 
 const CreateEmailModal = ({ isOpen, onClose, onCreateEmail }) => {
-  const [emailAddress, setEmailAddress] = useState('');
+  const [emailAddress, setEmailAddress] = useState("");
+  const toast = useToast();
+  const [loading, setLoading] = useState(false);
 
-  const handleCreateEmail = () => {
+  const handleCreateEmail = async () => {
     // Perform any actions before creating email
     // For example: call an API to create email
-    onCreateEmail(emailAddress);
-    setEmailAddress("")
+    //onCreateEmail(emailAddress);
+    setLoading(true);
+    const api = await CreateEmail({
+      permanent: true,
+      emailName: emailAddress,
+    });
+    setLoading(false);
+    if (!api.success) {
+      toast({
+        title: api.message,
+        status: "warning",
+        isClosable: true,
+      });
+      return;
+    } else {
+      toast({
+        title: `${emailAddress}@startlify.xyz has been created successfully!. You can now receive emails`,
+        status: "success",
+        isClosable: true,
+      });
+      setEmailAddress("");
+      onCreateEmail(api.data);
+    }
     // onClose();
+  };
+
+  const handleEmailAddress = (emailString) => {
+    var email = filterAlphanumeric(emailString);
+    if (email.length < 30) {
+      setEmailAddress(email);
+    }
   };
 
   return (
@@ -33,12 +66,19 @@ const CreateEmailModal = ({ isOpen, onClose, onCreateEmail }) => {
           <Input
             placeholder="Enter name address @startlify.xyz"
             value={emailAddress}
-            onChange={(e) => setEmailAddress(e.target.value)}
+            onChange={(e) => handleEmailAddress(e.target.value)}
           />
-          <Text fontSize={12}>{emailAddress === "" ? "" : emailAddress + "@startlify.xyz"}</Text>
+          <Text fontSize={12}>
+            {emailAddress === "" ? "" : emailAddress + "@startlify.xyz"}
+          </Text>
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme="green" onClick={handleCreateEmail}>
+          <Button
+            colorScheme="green"
+            onClick={handleCreateEmail}
+            isLoading={loading}
+            isDisabled={emailAddress.length < 4 ||  loading}
+          >
             Create Email
           </Button>
         </ModalFooter>

@@ -5,9 +5,18 @@ export const validateEmail = (email) => {
   return emailPattern.test(email);
 }
 export const LogUserIn = (userObj) => {
-  console.log(userObj);
+
   localStorage.setItem('user', JSON.stringify(userObj));
   localStorage.setItem('token', userObj.token);
+}
+export const getUser = () => {
+  const user = localStorage.getItem('user');
+  if(user){
+    return JSON.parse(user) || {}
+  }
+  else {
+    window.location.href = "/auth/login";
+  }
 }
 export const Register = async (payload) => {
   // {
@@ -32,7 +41,8 @@ export const Register = async (payload) => {
       success: true,
       ...req.data,
     };
-  } catch (err) {
+  }  catch (err) {
+    handleStatusCode(err?.response?.status);
     return {
       success: false,
       message: err?.response?.data?.message || "Request failed ",
@@ -61,7 +71,8 @@ export const Login = async (payload) => {
       success: true,
       ...req.data,
     };
-  } catch (err) {
+  }  catch (err) {
+    handleStatusCode(err?.response?.status);
     return {
       success: false,
       message: err?.response?.data?.message || "Request failed ",
@@ -99,13 +110,19 @@ export const CreateEmail = async (payload) => {
       success: true,
       ...req.data,
     };
-  } catch (err) {
+  }  catch (err) {
+    handleStatusCode(err?.response?.status);
     return {
       success: false,
       message: err?.response?.data?.message || "Request failed ",
     };
   }
 };
+export const handleStatusCode = (statusCode) => {
+  if(statusCode === 403){
+    window.location.href = "/auth/login";
+  }
+}
 export const GetUserEmails = async () => {
   const token = await getTokenFromLocal();
   // {
@@ -128,6 +145,7 @@ export const GetUserEmails = async () => {
       ...req.data,
     };
   } catch (err) {
+    handleStatusCode(err?.response?.status);
     return {
       success: false,
       message: err?.response?.data?.message || "Request failed ",
@@ -155,7 +173,8 @@ export const GetEmails = async (emailID) => {
       success: true,
       ...req.data,
     };
-  } catch (err) {
+  }  catch (err) {
+    handleStatusCode(err?.response?.status);
     return {
       success: false,
       message: err?.response?.data?.message || "Request failed ",
@@ -184,6 +203,7 @@ export const GetEmailDetails = async (emailID, emailAddressID) => {
       ...req.data,
     };
   } catch (err) {
+    console.log(err);
     return {
       success: false,
       message: err?.response?.data?.message || "Request failed ",

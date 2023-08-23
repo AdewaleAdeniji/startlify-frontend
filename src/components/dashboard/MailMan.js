@@ -1,8 +1,10 @@
 import React from "react";
-import { Box, Flex, Image, Text } from "@chakra-ui/react";
+import { Box, Divider, Flex, Image, Text, useColorModeValue } from "@chakra-ui/react";
 import DashboardTable from "../../components/dashboard/table";
+import { formatDate } from "../../services/date";
 
-const MailMan = ({ emails }) => {
+const MailMan = ({ emails, handleOpenEmail }) => {
+  const color = useColorModeValue("black", "black")
   return (
     <>
       {emails.map((email) => {
@@ -11,27 +13,33 @@ const MailMan = ({ emails }) => {
             p={3}
             borderRadius="md"
             borderWidth="1px"
+            m={3}
             bg={"white"}
             borderColor="gray.200"
             display={{ base: "block", md: "none" }} // Display on mobile only
+            onClick={() => handleOpenEmail(email?.emailAddressID, email?.emailID)}
           >
             <Flex alignItems="center">
               <Image
                 src="https://flowbite-admin-dashboard.vercel.app/images/logo.svg"
                 boxSize="40px"
+                alt={email?.emailFrom}
                 objectFit="cover"
                 mr={3}
               />
               <Box flex="1">
-                <Text fontWeight="bold">Title of the email</Text>
+                <Text fontWeight="bold" color={color}>{email?.subject}</Text>
                 <Text fontSize="sm" color="gray.600">
-                  some excerpts from the email
+                {email?.text}....
                 </Text>
               </Box>
-              <Text fontSize="sm" color="gray.600">
-                24/09/2002
-              </Text>
+              
             </Flex>
+              <Divider />
+              
+              <Text fontSize="sm" textAlign="right" color="gray.600">
+              {formatDate(email?.sendDate)}
+              </Text>
           </Box>
         );
       })}
@@ -39,7 +47,7 @@ const MailMan = ({ emails }) => {
       <Box
         display={{ base: "none", md: "block" }} // Display on mobile only
       >
-        <DashboardTable emails={emails} />
+        <DashboardTable emails={emails} handleOpenEmail={handleOpenEmail}/>
       </Box>
     </>
   );
