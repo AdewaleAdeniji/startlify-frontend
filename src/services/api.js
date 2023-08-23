@@ -9,6 +9,11 @@ export const LogUserIn = (userObj) => {
   localStorage.setItem('user', JSON.stringify(userObj));
   localStorage.setItem('token', userObj.token);
 }
+export const LogUserOut = () => {
+  localStorage.removeItem('user')
+  localStorage.removeItem('token');
+  window.location.href = "/auth/login";
+}
 export const getUser = () => {
   const user = localStorage.getItem('user');
   if(user){

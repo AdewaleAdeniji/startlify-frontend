@@ -20,9 +20,8 @@ import {
   useDisclosure
 } from "@chakra-ui/react";
 import { FiChevronDown, FiHome, FiMenu } from "react-icons/fi";
-import { CHANGE_EMAIL_TYPES } from "../../constants";
+import { LogUserOut, getUser } from "../../services/api";
 import { SidebarContent } from "./SideBarContent";
-import { getUser } from "../../services/api";
 
 const LinkItems = [
   { name: "Dashboard", icon: FiHome, path: "/app/dashboard" },
@@ -41,7 +40,6 @@ const MobileNav = ({
 }) => {
   const { colorMode, toggleColorMode } = useColorMode();
   const user = getUser();
-  //console.log(user);
   return (
     <Flex
       ml={{ base: 0, md: 60 }}
@@ -127,7 +125,7 @@ const MobileNav = ({
               })} */}
               <MenuDivider />
             
-              <MenuItem>Sign out</MenuItem>
+              <MenuItem onClick={LogUserOut}>Sign out</MenuItem>
             </MenuList>
           </Menu>
         </Flex>

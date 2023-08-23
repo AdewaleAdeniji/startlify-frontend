@@ -19,6 +19,7 @@ import {
 import { BsPerson } from "react-icons/bs";
 import { FiChevronDown, FiMail, FiServer } from "react-icons/fi";
 import { CHANGE_EMAIL_TYPES } from "../../constants";
+import { LogUserOut } from "../../services/api";
 
 function StatsCard(props) {
   const { title, stat, icon } = props;
@@ -114,7 +115,7 @@ export default function BasicStatistics({
               );
             })}
             <MenuDivider />
-            <MenuItem>Sign out</MenuItem>
+            <MenuItem onClick={LogUserOut}>Sign out</MenuItem>
           </MenuList>
         </Menu>
       </Box>

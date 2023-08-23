@@ -25,7 +25,6 @@ const SingleDashboard = () => {
     const interval = setInterval(() => {
       setupDashboard(false); // Subsequent setups every 7 seconds
     }, 7000); // 7 seconds in milliseconds
-
     return () => clearInterval(interval); // Clean up interval on unmount
   }, [emailAddressID]);
   if (!emailAddressID) {
@@ -79,11 +78,17 @@ const SingleDashboard = () => {
     setLoadingText("Refreshing emails");
     setLoading(true);
     const api = await GetEmails(emailAddressID);
+    if (!api.success) {
+      return toast({
+        title: api.message,
+        status: "error",
+        isClosable: true,
+      });
+    }
     setLoading(false);
     setLoadingText("");
     // if (api.emails.length > 0) {
       saveData(`${emailAddressID}-emails`, api.emails)
-      console.log(api.emails)
       setEmails(api.emails);
     // }
   };

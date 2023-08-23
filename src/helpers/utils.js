@@ -1,5 +1,6 @@
 
 import CryptoJS from "crypto-js";
+import { getUser } from "../services/api";
 
 export function filterAlphanumeric(inputString) {
   const filteredString = inputString.replace(/[^a-zA-Z0-9]/g, "");
@@ -8,13 +9,14 @@ export function filterAlphanumeric(inputString) {
 
 
 export const useCache = () => {
+    const user = getUser();
   const encrypt = (dataKey, data) => {
-    return CryptoJS.AES.encrypt(JSON.stringify(data), dataKey).toString();
+    return CryptoJS.AES.encrypt(JSON.stringify(data), dataKey+user?.userID).toString();
   };
 
   const decrypt = (dataKey, encryptedData) => {
     try {
-      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, dataKey);
+      const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, dataKey+ user?.userID);
       return JSON.parse(decryptedBytes.toString(CryptoJS.enc.Utf8));
     } catch (error) {
       console.error("Error decrypting data:", error);

@@ -8,7 +8,6 @@ import { CHANGE_EMAIL_TYPES } from "../../constants";
 export const SidebarContent = ({ onClose, handleChangeEmail,  ...rest }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const handleCreateEmail = (email) => {
-      console.log(email);
       //setModalOpen(false);
       handleChangeEmail(CHANGE_EMAIL_TYPES.EMAIL_CREATED, email)
     };
