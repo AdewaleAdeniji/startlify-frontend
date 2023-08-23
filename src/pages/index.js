@@ -61,7 +61,7 @@ const LandingPage = () => {
               _hover={{
                 bg: "green.500",
               }}
-              onClick={() => (window.location.href = "/auth/register")}
+              onClick={() => (window.location.href = "/auth/signup")}
             >
               Get Started
             </Button>
