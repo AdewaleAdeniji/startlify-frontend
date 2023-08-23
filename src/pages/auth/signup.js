@@ -23,10 +23,10 @@ import { LogUserIn, Login, Register, validateEmail } from "../../services/api";
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [payload, setPayload] = useState({
-    email: "test@email.co",
-    firstName: "ade",
-    lastName: "yemi",
-    password: "ddsksdddkdk",
+    email: "",
+    firstName: "",
+    lastName: "",
+    password: "",
   });
   const [loading, setLoading] = useState(false);
   const disabled =
@@ -37,7 +37,6 @@ export default function Signup() {
     loading;
   const toast = useToast();
   const handleSubmit = async () => {
-    console.log("submit button clicked");
     if(payload.password.length < 8) {
       return toast({
         title: `Password must be 8 characters or more`,
@@ -48,6 +47,13 @@ export default function Signup() {
     if(payload.email.length < 4 || !validateEmail(payload.email)) {
       return toast({
         title: `Invalid email address`,
+        status: 'error',
+        isClosable: true,
+      })
+    }
+    if(payload.email.indexOf('startlify') > -1){
+      return toast({
+        title: `You cannot sign up with a startlify email`,
         status: 'error',
         isClosable: true,
       })
@@ -75,10 +81,7 @@ export default function Signup() {
     }
     await LogUserIn(login);
     window.location.href="/app/dashboard"
-    console.log('attempt to sign in')
-
   };
-  console.log(disabled);
   return (
     <PageContainer>
       <Flex

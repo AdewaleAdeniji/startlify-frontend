@@ -22,8 +22,8 @@ import { LogUserIn, Login, validateEmail } from "../../services/api";
   export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [payload, setPayload] = useState({
-      email: "test@email.co",
-      password: "ddsksdddkdk",
+      email: "",
+      password: "",
     });
     const [loading, setLoading] = useState(false);
     const disabled =

@@ -24,6 +24,13 @@ const CreateEmailModal = ({ isOpen, onClose, onCreateEmail }) => {
     // Perform any actions before creating email
     // For example: call an API to create email
     //onCreateEmail(emailAddress);
+    if(emailAddress.indexOf('startlify') > -1){
+      return toast({
+        title: `You cannot create an email with the word startlify`,
+        status: 'error',
+        isClosable: true,
+      })
+    }
     setLoading(true);
     const api = await CreateEmail({
       permanent: true,

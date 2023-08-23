@@ -17,7 +17,6 @@ import React from "react";
 import PageContainer from "../layouts/PageContainer";
 
 const LandingPage = () => {
-
   return (
     <PageContainer>
       <Container maxW={"3xl"}>
@@ -62,6 +61,7 @@ const LandingPage = () => {
               _hover={{
                 bg: "green.500",
               }}
+              onClick={() => (window.location.href = "/auth/login")}
             >
               Get Started
             </Button>

@@ -208,7 +208,6 @@ export const GetEmailDetails = async (emailID, emailAddressID) => {
       ...req.data,
     };
   } catch (err) {
-    console.log(err);
     return {
       success: false,
       message: err?.response?.data?.message || "Request failed ",
